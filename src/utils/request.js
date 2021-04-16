@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { Base64 } from 'js-base64'
 import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
 import { getToken } from '@/utils/auth'
@@ -12,11 +13,8 @@ const service = axios.create({
 // request interceptor
 service.interceptors.request.use(
     config => {
-        console.log('====================================')
-        console.log(config)
-        console.log('====================================')
         if (store.getters.token) {
-            config.headers['X-Token'] = getToken()
+            config.headers['Authorization'] = _encode()
         }
         return config
     },
@@ -30,10 +28,9 @@ service.interceptors.request.use(
 service.interceptors.response.use(
     response => {
         const res = response.data
-
-        if (res.code !== 20000) {
+        if (res.code !== 0) {
             Message({
-                message: res.message || 'Error',
+                message: res.msg || 'Error',
                 type: 'error',
                 duration: 5 * 1000
             })
@@ -66,5 +63,11 @@ service.interceptors.response.use(
         return Promise.reject(error)
     }
 )
+
+function _encode() {
+    const token = getToken()
+    const base64 = Base64.encode(`${token}:`)
+    return `Basic ${base64}`
+}
 
 export default service
