@@ -1,8 +1,7 @@
 import axios from 'axios'
-import { Base64 } from 'js-base64'
 import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
-import { getToken } from '@/utils/auth'
+import { _encode } from '@/utils/auth'
 
 // create an axios instance
 const service = axios.create({
@@ -53,6 +52,7 @@ service.interceptors.response.use(
         }
     },
     error => {
+        console.log(error.response)
         let message = error.message || '请求失败'
         if (error.response && error.response.data) {
             const { data } = error.response
@@ -66,11 +66,5 @@ service.interceptors.response.use(
         return Promise.reject(error)
     }
 )
-
-function _encode() {
-    const token = getToken()
-    const base64 = Base64.encode(`${token}:`)
-    return `Basic ${base64}`
-}
 
 export default service
