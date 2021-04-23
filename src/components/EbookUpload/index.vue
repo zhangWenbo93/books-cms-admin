@@ -16,16 +16,22 @@
             drag
             show-file-list
             class="image-uploader"
+            accept="application/epub+zip"
         >
-            <!-- accept="application/epub+zip" -->
-            <el-button
-                size="small"
-                type="primary"
-            >点击上传</el-button>
+            <i class="el-icon-upload" />
             <div
-                slot="tip"
-                class="el-upload__tip"
-            >只能上传jpg/png文件，且不超过500kb</div>
+                v-if="fileList.length === 0"
+                class="el-upload__text"
+            >
+                请将电子书拖入或
+                <em>点击上传</em>
+            </div>
+            <div
+                v-else
+                class="el-upload__text"
+            >
+                图书已上传
+            </div>
         </el-upload>
     </div>
 </template>
@@ -63,16 +69,36 @@ export default {
 
     methods: {
         onRemove() {
-
+            this.$message({
+                type: 'success',
+                message: '电子书删除成功'
+            })
+            this.$emit('onRemove')
         },
         onExceed() {
-
+            this.$message({
+                type: 'warning',
+                message: '每次只能上传一本电子书'
+            })
         },
-        beforeUpload() {
-
+        beforeUpload(file) {
+            this.$emit('beforeUpload', file)
         },
-        onSuccess() {
-
+        onSuccess(res, file) {
+            const { code, msg, data } = res
+            if (code !== 0) {
+                this.$message({
+                    message: msg && `上传失败，失败原因：${msg}` || '上传失败',
+                    type: 'error'
+                })
+                this.$emit('onError', data)
+            } else {
+                this.$message({
+                    message: '上传成功',
+                    type: 'success'
+                })
+                this.$emit('onSuccess', data)
+            }
         },
         onError(err) {
             const errMsg = (err.message && JSON.parse(err.message)) || '上传失败'
@@ -86,4 +112,14 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.upload-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+
+    .image-uploader {
+        height: 100%;
+    }
+}
+</style>
