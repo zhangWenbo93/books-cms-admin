@@ -1,7 +1,11 @@
 <!--  -->
 <template>
     <div class="detail">
-        <el-form :model="postForm">
+        <el-form
+            ref="postForm"
+            :model="postForm"
+            :rules="rules"
+        >
             <sticky :class-name="'sub-navbar'">
                 <el-button
                     v-show="!isEdit"
@@ -52,6 +56,7 @@
                                     <el-form-item
                                         :label-width="labelWidth"
                                         label="作者："
+                                        prop="author"
                                     >
                                         <el-input
                                             v-model="postForm.author"
@@ -64,6 +69,7 @@
                                     <el-form-item
                                         :label-width="labelWidth"
                                         label="出版社："
+                                        prop="publisher"
                                     >
                                         <el-input
                                             v-model="postForm.publisher"
@@ -78,6 +84,7 @@
                                     <el-form-item
                                         :label-width="labelWidth"
                                         label="语言："
+                                        prop="language"
                                     >
                                         <el-input
                                             v-model="postForm.language"
@@ -168,7 +175,7 @@
                                             target="_blank"
                                         >
                                             <img
-                                                :src="postForm.cover"
+                                                :src="'http://localhost:8089/admin-upload-ebook'+postForm.cover"
                                                 class="preview-img"
                                             >
                                         </a>
@@ -204,10 +211,18 @@
 </template>
 
 <script>
+import { createBook } from '@/api/book'
 import Sticky from '@/components/Sticky/index'
 import Waring from './Waring'
 import EbookUpload from '@/components/EbookUpload/index'
 import MDinput from '@/components/MDinput/index'
+
+const fields = {
+    title: '书名',
+    author: '作者',
+    publisher: '出版社',
+    language: '语言'
+}
 
 export default {
     name: 'Details',
@@ -227,9 +242,26 @@ export default {
     },
 
     data() {
+        const validateRequire = (rule, value, callback) => {
+            if (!value) {
+                // this.$message({
+                //     message: fields[rule.field] + '为必传项',
+                //     type: 'error'
+                // })
+                callback(new Error(fields[rule.field] + '为必传项'))
+            } else {
+                callback()
+            }
+        }
         return {
             loading: false,
             postForm: {},
+            rules: {
+                title: [{ validator: validateRequire }],
+                author: [{ validator: validateRequire }],
+                publisher: [{ validator: validateRequire }],
+                language: [{ validator: validateRequire }]
+            },
             fileList: [],
             labelWidth: '120px'
         }
@@ -238,18 +270,33 @@ export default {
     methods: {
         showGuide() { },
         submitForm() {
-            this.loading = true
-            setInterval(() => {
-                this.loading = false
-            }, 1000)
+            // this.loading = true
+            this.$refs.postForm.validate(valid => {
+                if (valid) {
+                    const book = Object.assign({}, this.postForm)
+                    delete book.contents
+                    delete book.contentsTree
+                    createBook(book).then(res => {
+                        this.$notify({
+                            title: '成功',
+                            message: res.msg,
+                            type: 'success',
+                            duration: 2000
+                        })
+                        this.clearData()
+                    }).finally(() => {
+                        this.loading = false
+                    })
+                } else {
+                    this.loading = false
+                }
+            })
         },
         onUploadSuccess(data) {
             this.setData(data)
         },
         onUploadRemove() {
-            this.postForm = Object.assign({}, this.$data.options)
-            this.fileList = []
-            this.contentsTree = []
+            this.clearData()
         },
         onContentClick(data) {
             const { text } = data
@@ -267,6 +314,12 @@ export default {
             }
             this.fileList = [{ name: originalName, url }]
             this.contentsTree = contentsTree
+        },
+        clearData() {
+            this.postForm = Object.assign({}, this.$data.options)
+            this.fileList = []
+            this.contentsTree = []
+            this.$refs.postForm.resetFields()
         }
     }
 }
