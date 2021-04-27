@@ -42,7 +42,6 @@
                                 v-model="postForm.title"
                                 :maxlength="100"
                                 name="name"
-                                required
                             >
                                 书名
                             </MDinput>
@@ -270,7 +269,7 @@ export default {
     methods: {
         showGuide() { },
         submitForm() {
-            // this.loading = true
+            this.loading = true
             this.$refs.postForm.validate(valid => {
                 if (valid) {
                     const book = Object.assign({}, this.postForm)
