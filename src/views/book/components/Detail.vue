@@ -243,11 +243,30 @@ export default {
                 this.loading = false
             }, 1000)
         },
-        onUploadSuccess() {
-            console.log('onUploadSuccess')
+        onUploadSuccess(data) {
+            this.setData(data)
         },
         onUploadRemove() {
-            console.log('onUploadRemove')
+            this.postForm = Object.assign({}, this.$data.options)
+            this.fileList = []
+            this.contentsTree = []
+        },
+        onContentClick(data) {
+            const { text } = data
+
+            text && window.open(text)
+        },
+        setData(data) {
+            const {
+                originalName,
+                url,
+                contentsTree
+            } = data
+            this.postForm = {
+                ...data
+            }
+            this.fileList = [{ name: originalName, url }]
+            this.contentsTree = contentsTree
         }
     }
 }
