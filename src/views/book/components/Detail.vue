@@ -42,6 +42,7 @@
                                 v-model="postForm.title"
                                 :maxlength="100"
                                 name="name"
+                                required
                             >
                                 书名
                             </MDinput>
@@ -210,7 +211,7 @@
 </template>
 
 <script>
-import { createBook } from '@/api/book'
+import { createBook, updateBook } from '@/api/book'
 import Sticky from '@/components/Sticky/index'
 import Waring from './Waring'
 import EbookUpload from '@/components/EbookUpload/index'
@@ -273,19 +274,8 @@ export default {
             this.$refs.postForm.validate(valid => {
                 if (valid) {
                     const book = Object.assign({}, this.postForm)
-                    delete book.contents
                     delete book.contentsTree
-                    createBook(book).then(res => {
-                        this.$notify({
-                            title: '成功',
-                            message: res.msg,
-                            type: 'success',
-                            duration: 2000
-                        })
-                        this.clearData()
-                    }).finally(() => {
-                        this.loading = false
-                    })
+                    !this.isEdit ? this.handleCreateBook(book) : this.handleUpdateBook(book)
                 } else {
                     this.loading = false
                 }
@@ -295,12 +285,39 @@ export default {
             this.setData(data)
         },
         onUploadRemove() {
-            this.clearData()
+            this.resetData()
         },
         onContentClick(data) {
             const { text } = data
 
             text && window.open(text)
+        },
+        handleCreateBook(book) {
+            createBook(book).then(res => {
+                this.$notify({
+                    title: '成功',
+                    message: res.msg,
+                    type: 'success',
+                    duration: 2000
+                })
+                this.resetData()
+            }).finally(() => {
+                this.loading = false
+            })
+        },
+
+        handleUpdateBook(book) {
+            updateBook(book).then(res => {
+                this.$notify({
+                    title: '成功',
+                    message: res.msg,
+                    type: 'success',
+                    duration: 2000
+                })
+                this.resetData()
+            }).finally(() => {
+                this.loading = false
+            })
         },
         setData(data) {
             const {
@@ -314,7 +331,7 @@ export default {
             this.fileList = [{ name: originalName, url }]
             this.contentsTree = contentsTree
         },
-        clearData() {
+        resetData() {
             this.postForm = Object.assign({}, this.$data.options)
             this.fileList = []
             this.contentsTree = []

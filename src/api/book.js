@@ -15,3 +15,11 @@ export function createBook(data) {
         data
     })
 }
+
+export function updateBook(data) {
+    return request({
+        url: '/book/update',
+        method: 'post',
+        data
+    })
+}
