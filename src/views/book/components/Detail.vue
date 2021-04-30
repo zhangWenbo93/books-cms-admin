@@ -270,7 +270,7 @@ export default {
     },
 
     created() {
-        this.handleGetBook(this.fileName)
+        this.isEdit && this.handleGetBook(this.fileName)
     },
 
     methods: {
