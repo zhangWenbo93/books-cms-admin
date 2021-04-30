@@ -23,3 +23,18 @@ export function updateBook(data) {
         data
     })
 }
+
+export function fileNameBook(query) {
+    return request({
+        url: `/book/filename/${query}`,
+        method: 'get'
+    })
+}
+
+export function bookList(data) {
+    return request({
+        url: '/book/list',
+        method: 'post',
+        data
+    })
+}

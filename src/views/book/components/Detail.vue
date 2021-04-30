@@ -175,7 +175,7 @@
                                             target="_blank"
                                         >
                                             <img
-                                                :src="'http://localhost:8089/admin-upload-ebook'+postForm.cover"
+                                                :src="postForm.cover"
                                                 class="preview-img"
                                             >
                                         </a>
@@ -190,7 +190,7 @@
                                         label="目录："
                                     >
                                         <div
-                                            v-if="postForm.contents && postForm.contents.length > 0"
+                                            v-if="contentsTree && contentsTree.length > 0"
                                             class="contents-wrapper"
                                         >
                                             <el-tree
@@ -211,7 +211,7 @@
 </template>
 
 <script>
-import { createBook, updateBook } from '@/api/book'
+import { createBook, updateBook, fileNameBook } from '@/api/book'
 import Sticky from '@/components/Sticky/index'
 import Waring from './Waring'
 import EbookUpload from '@/components/EbookUpload/index'
@@ -254,6 +254,7 @@ export default {
             }
         }
         return {
+            fileName: this.$route.params.fileName,
             loading: false,
             postForm: {},
             rules: {
@@ -263,8 +264,13 @@ export default {
                 language: [{ validator: validateRequire }]
             },
             fileList: [],
+            contentsTree: [],
             labelWidth: '120px'
         }
+    },
+
+    created() {
+        this.handleGetBook(this.fileName)
     },
 
     methods: {
@@ -292,6 +298,11 @@ export default {
 
             text && window.open(text)
         },
+        handleGetBook(fileName) {
+            fileNameBook(fileName).then(res => {
+                this.setData(res.data)
+            })
+        },
         handleCreateBook(book) {
             createBook(book).then(res => {
                 this.$notify({
@@ -314,7 +325,6 @@ export default {
                     type: 'success',
                     duration: 2000
                 })
-                this.resetData()
             }).finally(() => {
                 this.loading = false
             })
