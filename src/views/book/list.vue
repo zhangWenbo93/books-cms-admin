@@ -226,7 +226,7 @@
 </template>
 
 <script>
-import { bookList, getCategory } from '@/api/book'
+import { bookList, getCategory, deleteBook } from '@/api/book'
 import waves from '@/directive/waves'
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination'
@@ -308,8 +308,22 @@ export default {
             this.$router.push(`/book/edit/${fileName}`)
         },
 
-        handleDelete() {
-
+        handleDelete(row) {
+            this.$confirm('此操作将永久删除该电子书, 是否继续?', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                deleteBook(row.fileName).then(response => {
+                    // this.$notify({
+                    //     title: '成功',
+                    //     message: response.msg || '删除成功',
+                    //     type: 'success',
+                    //     duration: 2000
+                    // })
+                    // this.handleFilter()
+                })
+            })
         },
 
         async parseQuery() {

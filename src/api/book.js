@@ -45,3 +45,10 @@ export function bookList(data) {
         data
     })
 }
+
+export function deleteBook(query) {
+    return request({
+        url: `/book/delete/${query}`,
+        method: 'get'
+    })
+}
