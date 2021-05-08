@@ -31,8 +31,8 @@
                 <el-option
                     v-for="item in categoryList"
                     :key="item.value"
-                    :label="item.label"
-                    :value="item.label"
+                    :label="item.categoryText"
+                    :value="item.category"
                 />
             </el-select>
             <el-button
@@ -226,7 +226,7 @@
 </template>
 
 <script>
-import { bookList } from '@/api/book'
+import { bookList, getCategory } from '@/api/book'
 // import { listBook, getCategory, deleteBook } from '@/api/book'
 import waves from '@/directive/waves'
 import { parseTime } from '@/utils'
@@ -267,13 +267,14 @@ export default {
 
     async created() {
         this.parseQuery()
+        this.getCategory()
     },
 
     methods: {
         handleFilter() { },
 
         forceRefresh() {
-
+            this.parseQuery()
         },
 
         handleCreate() {
@@ -283,9 +284,16 @@ export default {
         changeShowCover() {
 
         },
+        async getCategory() {
+            const res = await getCategory()
 
-        sortChange() {
+            this.categoryList = res.data
+        },
 
+        sortChange(val) {
+            const order = val.order === 'descending' ? 'DESC' : 'ASC'
+            this.listQuery.order = order
+            this.parseQuery()
         },
 
         getSortClass() {
@@ -296,6 +304,14 @@ export default {
                 path: '/book/list',
                 query: this.listQuery
             })
+        },
+
+        handleUpdate({ fileName }) {
+            this.$router.push(`/book/edit/${fileName}`)
+        },
+
+        handleDelete() {
+
         },
 
         async parseQuery() {

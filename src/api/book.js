@@ -31,6 +31,13 @@ export function fileNameBook(query) {
     })
 }
 
+export function getCategory() {
+    return request({
+        url: `/book/category`,
+        method: 'get'
+    })
+}
+
 export function bookList(data) {
     return request({
         url: '/book/list',
