@@ -5,7 +5,7 @@
                 v-model="listQuery.title"
                 clearable
                 placeholder="书名"
-                style="width: 200px;"
+                style="width: 200px; margin-right: 10px;"
                 class="filter-item"
                 @keyup.enter.native="handleFilter"
                 @clear="handleFilter"
@@ -15,7 +15,7 @@
                 v-model="listQuery.author"
                 clearable
                 placeholder="作者"
-                style="width: 200px;"
+                style="width: 200px; margin-right: 10px;"
                 class="filter-item"
                 @keyup.enter.native="handleFilter"
                 @clear="handleFilter"
@@ -31,7 +31,7 @@
                 <el-option
                     v-for="item in categoryList"
                     :key="item.value"
-                    :label="item.categoryText"
+                    :label="item.categoryText + `(${item.num})`"
                     :value="item.category"
                 />
             </el-select>
@@ -227,7 +227,6 @@
 
 <script>
 import { bookList, getCategory } from '@/api/book'
-// import { listBook, getCategory, deleteBook } from '@/api/book'
 import waves from '@/directive/waves'
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination'
@@ -271,7 +270,9 @@ export default {
     },
 
     methods: {
-        handleFilter() { },
+        handleFilter() {
+            this.listQuery.page = 1
+        },
 
         forceRefresh() {
             this.parseQuery()
@@ -281,8 +282,8 @@ export default {
             this.$router.push('/book/create')
         },
 
-        changeShowCover() {
-
+        changeShowCover(value) {
+            this.showCover = value
         },
         async getCategory() {
             const res = await getCategory()
@@ -300,10 +301,7 @@ export default {
 
         },
         refresh() {
-            this.$router.push({
-                path: '/book/list',
-                query: this.listQuery
-            })
+            this.parseQuery()
         },
 
         handleUpdate({ fileName }) {
@@ -315,6 +313,7 @@ export default {
         },
 
         async parseQuery() {
+            this.listLoading = true
             const response = await bookList(this.listQuery)
             const {
                 list,
