@@ -7,9 +7,6 @@
                 placeholder="书名"
                 style="width: 200px; margin-right: 10px;"
                 class="filter-item"
-                @keyup.enter.native="handleFilter"
-                @clear="handleFilter"
-                @blur="handleFilter"
             />
             <el-input
                 v-model="listQuery.author"
@@ -17,16 +14,13 @@
                 placeholder="作者"
                 style="width: 200px; margin-right: 10px;"
                 class="filter-item"
-                @keyup.enter.native="handleFilter"
-                @clear="handleFilter"
-                @blur="handleFilter"
             />
             <el-select
                 v-model="listQuery.category"
                 placeholder="分类"
                 clearable
                 class="filter-item"
-                @change="handleFilter"
+                @change="handleCategory"
             >
                 <el-option
                     v-for="item in categoryList"
@@ -79,7 +73,6 @@
                 sortable="custom"
                 align="center"
                 width="80"
-                :class-name="getSortClass('id')"
             />
             <el-table-column
                 label="书名"
@@ -263,19 +256,51 @@ export default {
             categoryList: []
         }
     },
-
-    async created() {
+    created() {
         this.parseQuery()
+    },
+    mounted() {
+        this.getList()
         this.getCategory()
     },
-
+    // 解决路有变化时当前页面的数据刷新
+    beforeRouteUpdate(to, from, next) {
+        if (to.path === from.path) {
+            const newQuery = Object.assign({}, to.query)
+            const oldQuery = Object.assign({}, from.query)
+            if (JSON.stringify(newQuery) !== JSON.stringify(oldQuery)) {
+                this.getList()
+            }
+        }
+        next()
+    },
     methods: {
+        parseQuery() {
+            // 收集查询条件
+            const query = Object.assign({}, this.$route.query)
+            let listQuery = {
+                page: 1,
+                pageSize: 20,
+                order: 'ASC'
+            }
+            if (query) {
+                query.page && (query.page = Number(query.page))
+                query.pageSize && (query.pageSize = Number(query.pageSize))
+                query.category && (query.category = Number(query.category))
+                listQuery = {
+                    ...listQuery,
+                    ...query
+                }
+            }
+            this.listQuery = listQuery
+        },
         handleFilter() {
             this.listQuery.page = 1
+            this.refresh()
         },
 
         forceRefresh() {
-            this.parseQuery()
+            this.handleFilter()
         },
 
         handleCreate() {
@@ -293,14 +318,17 @@ export default {
         sortChange(val) {
             const order = val.order === 'descending' ? 'DESC' : 'ASC'
             this.listQuery.order = order
-            this.parseQuery()
+            this.handleFilter()
         },
 
-        getSortClass() {
-
+        handleCategory(val) {
+            this.listQuery.category = val
         },
         refresh() {
-            this.parseQuery()
+            this.$router.push({
+                path: '/book/list',
+                query: this.listQuery
+            })
         },
 
         handleUpdate({ fileName }) {
@@ -320,12 +348,12 @@ export default {
                         type: 'success',
                         duration: 2000
                     })
-                    this.parseQuery()
+                    this.handleFilter()
                 })
             })
         },
 
-        async parseQuery() {
+        async getList() {
             this.listLoading = true
             const response = await bookList(this.listQuery)
             const {
