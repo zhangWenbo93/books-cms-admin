@@ -275,6 +275,7 @@ export default {
         next()
     },
     methods: {
+        // 处理查询条件
         parseQuery() {
             // 收集查询条件
             const query = Object.assign({}, this.$route.query)
@@ -294,27 +295,29 @@ export default {
             }
             this.listQuery = listQuery
         },
+        // 处理过滤数据后的查询
         handleFilter() {
             this.listQuery.page = 1
             this.refresh()
         },
-
+        // 查询按钮事件
         forceRefresh() {
             this.handleFilter()
         },
-
+        // 创建图书
         handleCreate() {
             this.$router.push('/book/create')
         },
-
+        // 展示图片列
         changeShowCover(value) {
             this.showCover = value
         },
+        // 获取图书分类
         async getCategory() {
             const res = await getCategory()
             this.categoryList = res.data
         },
-
+        // 排序
         sortChange(val) {
             const order = val.order === 'descending' ? 'DESC' : 'ASC'
             this.listQuery.order = order
@@ -324,17 +327,18 @@ export default {
         handleCategory(val) {
             this.listQuery.category = val
         },
+        // 分页事件
         refresh() {
             this.$router.push({
                 path: '/book/list',
                 query: this.listQuery
             })
         },
-
+        // 更新图书
         handleUpdate({ fileName }) {
             this.$router.push(`/book/edit/${fileName}`)
         },
-
+        // 删除图书
         handleDelete({ fileName }) {
             this.$confirm('此操作将永久删除该电子书, 是否继续?', '提示', {
                 confirmButtonText: '确定',
@@ -352,7 +356,7 @@ export default {
                 })
             })
         },
-
+        // 获取图书列表
         async getList() {
             this.listLoading = true
             const response = await bookList(this.listQuery)
@@ -368,6 +372,7 @@ export default {
                 book.authorWrapper = this.wrapperKeyword('author', book.author)
             })
         },
+        // 处理搜索词高亮
         wrapperKeyword(k, v) {
             function highlight(value) {
                 return '<span style="color: #1890ff">' + value + '</span>'
