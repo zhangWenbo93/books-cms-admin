@@ -352,7 +352,8 @@ export default {
                         type: 'success',
                         duration: 2000
                     })
-                    this.handleFilter()
+                    this.listQuery.page = 1
+                    this.getList()
                 })
             })
         },
